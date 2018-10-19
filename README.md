@@ -1,8 +1,8 @@
 <h1 align="center">
-  Browser IndexedDB adapter for HA-store
+  Browser storage adapters for HA-store
 </h1>
 <h3 align="center">
-    Why not IndexedDB ?
+    Why not Browsers ?
   <br/><br/><br/>
 </h3>
 <br/>
@@ -14,7 +14,7 @@
 
 ---
 
-**HA-store-browser** is a plugin to replace the default in-memory storage in [ha-store](https://github.com/fed135/ha-store). Keys will be put in indexedDB, for faster page load times.
+**HA-store-browser** is a plugin to replace the default in-memory storage in [ha-store](https://github.com/fed135/ha-store). It offers a few choices, based on your preferences. Keys can be put in either LocalStorage or indexedDB.
 
 ---
 
@@ -28,10 +28,10 @@
 **Store**
 ```node
 const store = require('ha-store');
-const browserStore = require('ha-store-browser')();
+const browserStore = require('ha-store-browser/localstorage')(); // Or 'ha-store-browser/indexeddb'
 const itemStore = store({
   resolver: getItems,
-  store: browserStore,
+  store: browserStore('items'), // Provide a database name
 });
 ```
 

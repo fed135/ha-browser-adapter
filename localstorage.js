@@ -2,10 +2,6 @@
  * Browser store
  */
 
-/* Requires ------------------------------------------------------------------*/
-
-const DX = require('dexie').default;
-
 /* Methods -------------------------------------------------------------------*/
 
 /**
@@ -14,21 +10,11 @@ const DX = require('dexie').default;
  * @param {EventEmitter} emitter The event-emitter instance for the batcher
  * @param {Map} store A store instance to replace the default in-memory Map
  */
-function browserStore(dbname, version = 0) {
-  const store = new DX(dbname);
-  const localKey = `v${version}`;
-  store.version(1).stores({
-    [localKey]: 'key, value, timestamp',
-  });
+function browserStore(dbname, version) {
+  dbname = dbname || 'ha-store';
+  const store = localStorage;
 
   return (config, emitter) => {
-    function storePluginErrorHandler(err) {
-      try {
-        clear('*')
-      }
-      catch(e) {}
-      emitter.emit('storePluginErrored', err);
-    }
 
     /**
      * Performs a query that returns a single entities to be cached
@@ -36,20 +22,18 @@ function browserStore(dbname, version = 0) {
      * @param {string} method The dao method to call
      * @returns {Promise}
      */
-    async function get(key) {
-      return await store[localKey].get(key)
-        .catch(storePluginErrorHandler)
-        .then((res) => {
-          if (res === undefined || !(res && res.value)) return null;
-          const now = Date.now();
-          const ttl = res.timestamp + config.cache.limit;
-          // If expired
-          if (now > ttl) {
-            clear(key);
-            return null;
-          }
-          return res;
-        });
+    function get(key) {
+      let res = store.getItem(`${dbname}.${key}`);
+      if (res === undefined || res === null) return null;
+      res = JSON.parse(res);
+      const now = Date.now();
+      const ttl = res.timestamp + config.cache.limit;
+      // If expired
+      if (now > ttl) {
+        clear(key);
+        return null;
+      }
+      return res;
     }
 
     /**
@@ -62,11 +46,10 @@ function browserStore(dbname, version = 0) {
       const now = Date.now();
 
       keys.forEach((id) => {
-        store[localKey].put({
-          key: recordKey(id),
+        store.setItem(`${dbname}.${recordKey(id)}`, JSON.stringify({
           value: values[id],
           timestamp: now,
-        }).catch(storePluginErrorHandler);
+        }));
       });
       return true;
     }
@@ -78,17 +61,20 @@ function browserStore(dbname, version = 0) {
      */
     function clear(key) {
       if (key === '*') {
-        return !!store[localKey].clear()
-          .catch(storePluginErrorHandler);
+        for (let i in store) {
+          if (i.startsWith(`${dbname}.`)) store.removeItem(i);
+        }
+        return true;
       }
-      return !!store[localKey].delete(key)
-        .catch(storePluginErrorHandler);
+      return !!store.removeItem(`${dbname}.${key}`);
     }
 
     async function size() {
-      const hashLength = 0;/*await store.size()
-        .catch(storePluginErrorHandler);*/
-      return hashLength || 0;
+      let hashLength = 0;
+      for (let i in store) {
+        if (i.startsWith(`${dbname}.`)) hashLength++;
+      }
+      return hashLength;
     }
 
     return { get, set, clear, size };
