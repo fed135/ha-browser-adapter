@@ -1,6 +1,6 @@
 {
   "name": "ha-store-browser",
-  "version": "1.2.1",
+  "version": "1.0.0",
   "description": "A Browser LocalStorage adapter for ha-store",
   "main": "src/index.js",
   "scripts": {
