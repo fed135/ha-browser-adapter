@@ -1,0 +1,30 @@
+{
+  "name": "ha-store-browser",
+  "version": "1.2.1",
+  "description": "A Browser LocalStorage adapter for ha-store",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "npm run test:integration",
+    "test:integration": "mocha ./tests/integration --exit",
+    "bench": "node ./tests/profiling/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fed135/ha-browser-adapter.git"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/fed135/ha-browser-adapter/issues"
+  },
+  "homepage": "https://github.com/fed135/ha-browser-adapter#readme",
+  "devDependencies": {
+    "ha-store": "^1.6.0",
+    "chai": "^4.1.2",
+    "mocha": "^5.2.0",
+    "sinon": "^5.1.0"
+  },
+  "dependencies": {
+    "dexie": "^2.0.4"
+  }
+}
